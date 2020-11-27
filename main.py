@@ -91,31 +91,17 @@ for e in range(epochs):
             acc= (np.mean(np.stack(correct)))
             iter_acc= 'iteration %d epoch %d--> %f'%(i,e,acc)  #accuracy 
             print(iter_acc)   
+            
        
             if acc> best_accuracy:
                 improved_accuracy = 'Current accuracy = %f (%f), updating best model'%(acc,best_accuracy)
                 print(improved_accuracy)
                 best_accuracy = acc
-            
+                best_epoch= e
                 best_model = copy.deepcopy(model)
                 torch.save(model.state_dict(), arg.model)         #change name for each model
+            else:
+                if e-best_epoch>5: 
+                    break 
                 
 
-correct_test=[]
-best_accuracy_test=0
-
-
-
-for i, data in enumerate(test_set_generator):
-    best_model.eval()
-    feat,label=data
-
-    z_eval = model(feat.float().cuda())                
-    _, pred_test = torch.max(z_eval.detach().cpu(),dim=1)
-
-    correct_test.append((pred_test == label).float())
-
-    
- 
-acc_test = (np.mean(np.hstack(correct_test)))  
-print(acc_test)
