@@ -39,4 +39,4 @@ python3.6 main.py -n TCN -m models/tcn_b5r2.pkl -b 5 -r 2 -lr 0.001 -e 100
 python3.6 evaluation.py -n TCN -m models/tcn_b5r2.pkl -b 5 -r 2 
 ```
 
-Using the training parameters suggested above, the obtained results should be *0.816870* accuracy on the validation set and *0.934880* accuracy on the evaluation set. 
+Using the training parameters suggested above, the obtained results should be *0.816870* **accuracy on the validation set** and *0.934880* **accuracy on the evaluation set. 
