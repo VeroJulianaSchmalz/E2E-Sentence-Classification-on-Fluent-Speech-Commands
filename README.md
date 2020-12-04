@@ -10,9 +10,9 @@ The model used in the experiment is a Time Convoluted Network (**TCN**, availabl
 ## Pre-processing
 
 - *cutfiles.py*:
-'''
+```
 fcut,index= librosa.effects.trim(f,frame_length=2098, hop_length=562)
-'''
+```
 
 *./fluent_speech_commands_dataset/* identifies the folder in which the data are to be found.  
 
@@ -20,9 +20,9 @@ fcut,index= librosa.effects.trim(f,frame_length=2098, hop_length=562)
 ## Training 
 
 - *main.py* :  
-'''
+```
 python3.6 code/main.py -n TCN -m models/tcn_b5r2.pkl -b 5 -r 2 -lr 0.001 -e 100
-'''
+```
 
  *-n*: type of net 
  *-m*: model
@@ -31,10 +31,12 @@ python3.6 code/main.py -n TCN -m models/tcn_b5r2.pkl -b 5 -r 2 -lr 0.001 -e 100
  *-lr*: learning rate 
  *-e*: number of epochs 
  
+ 
+### Evaluation 
 
 - *evaluation.py*:  
-'''
+```
 python3.6 code/evaluation.py -n TCN -m models/tcn_b5r2.pkl -b 5 -r 2 
-'''
+```
 
 Using the training parameters suggested above, the obtained results should be *0.816870* accuracy on the validation set and *0.934880* accuracy on the evaluation set. 
