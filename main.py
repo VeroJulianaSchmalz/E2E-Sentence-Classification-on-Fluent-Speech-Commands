@@ -100,8 +100,5 @@ for e in range(epochs):
                 best_epoch= e
                 best_model = copy.deepcopy(model)
                 torch.save(model.state_dict(), arg.model)         #change name for each model
-            else:
-                if e-best_epoch > 5: 
-                    break 
                 
 
