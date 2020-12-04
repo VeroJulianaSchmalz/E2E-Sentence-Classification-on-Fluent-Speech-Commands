@@ -24,12 +24,12 @@ fcut,index= librosa.effects.trim(f,frame_length=2098, hop_length=562)
 python3.6 main.py -n TCN -m models/tcn_b5r2.pkl -b 5 -r 2 -lr 0.001 -e 100
 ```
 
- * *n*: type of net 
- * *m*: model
- * *b*: number of blocks of the TCN network 
- * *r*: number of repeats of the TCN network 
- * *lr*: learning rate 
- * *e*: number of epochs 
+ * *-n*: type of net 
+ * *-m*: model
+ * *-b*: number of blocks of the TCN network 
+ * *-r*: number of repeats of the TCN network 
+ * *-lr*: learning rate 
+ * *-e*: number of epochs 
  
  
 ### Evaluation 
