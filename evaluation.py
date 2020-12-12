@@ -23,12 +23,25 @@ import argparse
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
+#reading params
+parser = argparse.ArgumentParser(description='Desciption')
+parser.add_argument('-m', '--model', type = str, help = "model name", required=True)
+parser.add_argument('-n', '--net', type = str, help = 'net', choices = ['CNNNet','honk', 'TCN'], default='CNNNet')
+parser.add_argument('-b', '--blocks', type = int, help = 'blocks')
+parser.add_argument('-r', '--repeats', type = int, help='repeats')
+parser.add_argument('-w', '--workers', type = int, help='n_workers')
 
+
+#storing params 
+arg = parser.parse_args()
+model_name = arg.model
+netType = arg.net
+n_workers= arg.workers
 
 test_data = fsc_data('fluent_speech_commands_dataset/data/test_data.csv',max_len = 64000)
 params = {'batch_size': 20,      #n returned phrases 
               'shuffle': False,
-              'num_workers': 3} 
+               n_workers= arg.workers} 
 test_set_generator=data.DataLoader(test_data,**params)
 
 
@@ -36,21 +49,9 @@ test_set_generator=data.DataLoader(test_data,**params)
 valid_data = fsc_data('fluent_speech_commands_dataset/data/valid_data.csv',max_len = 64000)
 params = {'batch_size': 20,    
               'shuffle': False,
-              'num_workers': 6} 
+               n_workers= arg.workers} 
 valid_set_generator=data.DataLoader(valid_data,**params)
 
-#reading params
-parser = argparse.ArgumentParser(description='Desciption')
-parser.add_argument('-m', '--model', type = str, help = "model name", required=True)
-parser.add_argument('-n', '--net', type = str, help = 'net', choices = ['CNNNet','honk', 'TCN'], default='CNNNet')
-parser.add_argument('-b', '--blocks', type = int, help = 'blocks')
-parser.add_argument('-r', '--repeats', type = int, help='repeats')
-
-
-#storing params 
-arg = parser.parse_args()
-model_name = arg.model
-netType = arg.net
 
 if netType == 'CNNNet':
     model = CNNNet(n_frames = 401, n_feats = 40, kernel = 5, max_pooling = 2)
