@@ -30,7 +30,7 @@ parser.add_argument('-r', '--repeats', type = int, help='repeats')
 parser.add_argument('-lr', '--learning_rate', type = int, help = 'learning rate', default = 0.001)        #originally 0.01 
 parser.add_argument('-e', '--epochs', type = int, help = 'epochs', default = 100)                         #originally 30
 parser.add_argument('-w', '--workers', type = int, help='workers')
-parser.add_argument('-p', '--pathdataset', type = int, help='pathdataset')
+parser.add_argument('-p', '--pathdataset', type = str, help='pathdataset')
 
 #storing params 
 arg = parser.parse_args()
