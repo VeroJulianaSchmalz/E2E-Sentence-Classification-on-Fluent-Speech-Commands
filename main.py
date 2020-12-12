@@ -30,24 +30,26 @@ parser.add_argument('-r', '--repeats', type = int, help='repeats')
 parser.add_argument('-lr', '--learning_rate', type = int, help = 'learning rate', default = 0.001)        #originally 0.01 
 parser.add_argument('-e', '--epochs', type = int, help = 'epochs', default = 100)                         #originally 30
 parser.add_argument('-w', '--workers', type = int, help='workers')
+parser.add_argument('-p', '--pathdataset', type = int, help='pathdataset')
 
 #storing params 
 arg = parser.parse_args()
+path_dataset= arg.pathdataset
 
-test_data = fsc_data('fluent_speech_commands_dataset/data/test_data.csv',max_len = 64000)
+test_data = fsc_data( path_dataset + 'data/test_data.csv',max_len = 64000)
 params = {'batch_size': 20,   
               'shuffle': False}  
 test_set_generator=data.DataLoader(test_data,**params)
     
   
-train_data = fsc_data('fluent_speech_commands_dataset/data/train_data.csv',max_len = 64000)
+train_data = fsc_data( path_dataset + 'data/train_data.csv',max_len = 64000)
 params = {'batch_size': 200,
               'shuffle': True,
               'num_workers': arg.workers }                             #6 
 train_set_generator=data.DataLoader(train_data,**params)
   
 
-valid_data = fsc_data('fluent_speech_commands_dataset/data/valid_data.csv',max_len = 64000)
+valid_data = fsc_data(path_dataset + 'data/valid_data.csv',max_len = 64000)
 params = {'batch_size': 20,   
               'shuffle': False,
               'num_workers': arg.workers} 
