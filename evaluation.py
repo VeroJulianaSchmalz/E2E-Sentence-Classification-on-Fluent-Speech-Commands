@@ -35,7 +35,7 @@ parser.add_argument('-w', '--workers', type = int, help='workers')
 #storing params 
 arg = parser.parse_args()
 model_name = arg.model
-netType = arg.net
+
 
 
 test_data = fsc_data('fluent_speech_commands_dataset/data/test_data.csv',max_len = 64000)
@@ -53,9 +53,7 @@ params = {'batch_size': 20,
 valid_set_generator=data.DataLoader(valid_data,**params)
 
 
-if netType == 'CNNNet':
-    model = CNNNet(n_frames = 401, n_feats = 40, kernel = 5, max_pooling = 2)
-
+model = TCN(n_blocks=arg.blocks,n_repeats=arg.repeats)
 
 
 #loading the model 
@@ -63,10 +61,6 @@ model.load_state_dict(torch.load(model_name))
 model.eval()
 model.cuda()
 
-
-#model= TCN()
-#model.load_state_dict(torch.load("models/model_tcn.pkl"))
-### REMEMBER TO CHANGE THE MODEL NAME 
 
 correct_test = []
 
