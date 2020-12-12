@@ -24,11 +24,12 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 #reading params
 parser = argparse.ArgumentParser(description='Desciption')
 parser.add_argument('-m', '--model', type = str, help = "model name", required=True)
-parser.add_argument('-n', '--net', type = str, help='net', choices=['CNNNet','honk', 'TCN'], default = 'CNNNet')
+#parser.add_argument('-n', '--net', type = str, help='net', choices=['CNNNet','honk', 'TCN'], default = 'CNNNet')
 parser.add_argument('-b', '--blocks', type = int, help='blocks')
 parser.add_argument('-r', '--repeats', type = int, help='repeats')
 parser.add_argument('-lr', '--learning_rate', type = int, help = 'learning rate', default = 0.001)        #originally 0.01 
-parser.add_argument('-e', '--epochs', type = int, help = 'epochs', default = 100)                        #originally 30
+parser.add_argument('-e', '--epochs', type = int, help = 'epochs', default = 100)                         #originally 30
+parser.add_argument('-w', '--workers', type = int, help='workers')
 
 #storing params 
 arg = parser.parse_args()
@@ -42,28 +43,27 @@ test_set_generator=data.DataLoader(test_data,**params)
 train_data = fsc_data('fluent_speech_commands_dataset/data/train_data.csv',max_len = 64000)
 params = {'batch_size': 200,
               'shuffle': True,
-              'num_workers': 6}
+              'num_workers': arg.workers }                             #6 
 train_set_generator=data.DataLoader(train_data,**params)
   
 
 valid_data = fsc_data('fluent_speech_commands_dataset/data/valid_data.csv',max_len = 64000)
 params = {'batch_size': 20,   
               'shuffle': False,
-              'num_workers': 6} 
+              'num_workers': arg.workers} 
 valid_set_generator=data.DataLoader(valid_data,**params)
 
 
 
 model = TCN(n_blocks = arg.blocks,n_repeats=arg.repeats).cuda()                                   #original param values 5-2(changed params for the experiments) 
-#model= CNNNet(n_frames=401, n_feats=40, kernel=5, max_pooling=2).cuda()
-#model= honk(width=401).cuda()
+
     
-optimizer = optim.Adam(model.parameters(), lr = arg.learning_rate)                          #lr for the experiments=0.001
-###changed lr for TCN experiments, originally 0.01
+optimizer = optim.Adam(model.parameters(), lr = arg.learning_rate)                                #lr for the experiments=0.001, original 0.01
+
 criterion = torch.nn.CrossEntropyLoss()
 
 best_accuracy = 0
-epochs = arg.epochs                                                                #originally for each model 30 epochs
+epochs = arg.epochs                                                                               #originally for each model 30 epochs
 for e in range(epochs):
     for i, data in enumerate(train_set_generator):
         model.train()
