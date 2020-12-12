@@ -30,15 +30,15 @@ parser.add_argument('-m', '--model', type = str, help = "model name", required=T
 parser.add_argument('-b', '--blocks', type = int, help = 'blocks')
 parser.add_argument('-r', '--repeats', type = int, help='repeats')
 parser.add_argument('-w', '--workers', type = int, help='workers')
-
+parser.add_argument('-p', '--pathdataset', type = int, help='pathdataset')
 
 #storing params 
 arg = parser.parse_args()
 model_name = arg.model
+path_dataset= arg.pathdataset
 
 
-
-test_data = fsc_data('fluent_speech_commands_dataset/data/test_data.csv',max_len = 64000)
+test_data = fsc_data(path_dataset + 'data/test_data.csv',max_len = 64000)
 params = {'batch_size': 20,      #n returned phrases 
               'shuffle': False,
                'num_workers': arg.workers} 
@@ -46,7 +46,7 @@ test_set_generator=data.DataLoader(test_data,**params)
 
 
 
-valid_data = fsc_data('fluent_speech_commands_dataset/data/valid_data.csv',max_len = 64000)
+valid_data = fsc_data(path_dataset + 'data/valid_data.csv',max_len = 64000)
 params = {'batch_size': 20,    
               'shuffle': False,
                'num_workers': arg.workers} 
