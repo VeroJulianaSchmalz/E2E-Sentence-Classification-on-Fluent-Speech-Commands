@@ -45,24 +45,24 @@ valid_data = fsc_data(path_dataset + 'data/valid_data.csv',max_len = 64000)
 params = {'batch_size': batch_size,'shuffle': False, 'num_workers': arg.workers}
 valid_set_generator=data.DataLoader(valid_data,**params)
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print('Using device %s' % device)
 
 model = TCN(n_blocks=arg.blocks,n_repeats=arg.repeats)
-
 
 #loading the model 
 model.load_state_dict(torch.load(model_name))
 model.eval()
-model.cuda()
-
+model.to(device)
 
 correct_test = []
 for i, d in enumerate(test_set_generator):
     print('Iter %d (%d/%d)'%(i,i*batch_size,len(test_set)))
     feat,label=d
 
-    z_eval = model(feat.float().cuda())                
+    z_eval = model(feat.float().to(device))
     _, pred_test = torch.max(z_eval.detach().cpu(),dim=1)
-    correct_test.append((pred_test==label).float())
+    correct_test.append((pred_test == label).float())
 
 
 acc_test= (np.mean(np.hstack(correct_test)))  
@@ -74,9 +74,9 @@ for i, d in enumerate(valid_set_generator):
 
     feat,label=d
 
-    a_eval = model(feat.float().cuda())                
+    a_eval = model(feat.float().to(device))
     _, pred_test = torch.max(a_eval.detach().cpu(),dim=1)
-    correct_valid.append((pred_test==label).float())
+    correct_valid.append((pred_test == label).float())
 
 
 acc_val= (np.mean(np.hstack(correct_valid)))
