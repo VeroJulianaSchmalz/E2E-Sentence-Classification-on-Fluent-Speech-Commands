@@ -26,7 +26,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 #reading params
 parser = argparse.ArgumentParser(description='Desciption')
 parser.add_argument('-m', '--model', type = str, help = "model name", required=True)
-#parser.add_argument('-n', '--net', type = str, help = 'net', choices = ['CNNNet','honk', 'TCN'], default='CNNNet')
 parser.add_argument('-b', '--blocks', type = int, help = 'blocks')
 parser.add_argument('-r', '--repeats', type = int, help='repeats')
 parser.add_argument('-w', '--workers', type = int, help='workers')
@@ -37,19 +36,13 @@ arg = parser.parse_args()
 model_name = arg.model
 path_dataset= arg.pathdataset
 
-
+batch_size=100
 test_data = fsc_data(path_dataset + 'data/test_data.csv',max_len = 64000)
-params = {'batch_size': 20,      #n returned phrases 
-              'shuffle': False,
-               'num_workers': arg.workers} 
+params = {'batch_size': batch_size,'shuffle': False,'num_workers': arg.workers}
 test_set_generator=data.DataLoader(test_data,**params)
 
-
-
 valid_data = fsc_data(path_dataset + 'data/valid_data.csv',max_len = 64000)
-params = {'batch_size': 20,    
-              'shuffle': False,
-               'num_workers': arg.workers} 
+params = {'batch_size': batch_size,'shuffle': False, 'num_workers': arg.workers}
 valid_set_generator=data.DataLoader(valid_data,**params)
 
 
@@ -63,10 +56,9 @@ model.cuda()
 
 
 correct_test = []
-
-for i, data in enumerate(test_set_generator):
-    print(i,end = '\r')
-    feat,label=data
+for i, d in enumerate(test_set_generator):
+    print('Iter %d (%d/%d)'%(i,i*batch_size,len(test_set)))
+    feat,label=d
 
     z_eval = model(feat.float().cuda())                
     _, pred_test = torch.max(z_eval.detach().cpu(),dim=1)
@@ -77,15 +69,15 @@ acc_test= (np.mean(np.hstack(correct_test)))
 print("The accuracy on test set is %f" %(acc_test))
 
 
-test_val=[]
-for i, data in enumerate(valid_set_generator):
+correct_valid=[]
+for i, d in enumerate(valid_set_generator):
 
-    feat,label=data
+    feat,label=d
 
     a_eval = model(feat.float().cuda())                
     _, pred_test = torch.max(a_eval.detach().cpu(),dim=1)
-    test_val.append((pred_test==label).float())
+    correct_valid.append((pred_test==label).float())
 
 
-acc_val= (np.mean(np.hstack(test_val)))  
+acc_val= (np.mean(np.hstack(correct_valid)))
 print("The accuracy on the validation set is %f" %(acc_val))
