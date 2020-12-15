@@ -1,4 +1,4 @@
-# End-to-End Sentence-Classification-FSCs-Schmalz
+# End-to-End Sentence-Classification-on-FSCs-Schmalz
 
 End-to-End Sentence Classification based on the Fluent Speech Commands Dataset 
 
