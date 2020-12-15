@@ -39,6 +39,12 @@ tcnRepeats = arg.repeats
 learning_rate = arg.learning_rate
 epochs = arg.epochs
 modelname = arg.model
+
+##Set device as cuda if available, otherwise cpu
+
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print('Using device %s' % device)
+
 train_data = fsc_data( path_dataset + 'data/train_data.csv', max_len = 64000)
 params = {'batch_size': 200,
           'shuffle': True,
@@ -52,7 +58,7 @@ params = {'batch_size': 100,
           'num_workers': numworkers}
 valid_set_generator=data.DataLoader(valid_data,**params)
 
-model = TCN(n_blocks=tcnBlocks, n_repeats=tcnRepeats).cuda()
+model = TCN(n_blocks=tcnBlocks, n_repeats=tcnRepeats).to(device)
 
 optimizer = optim.Adam(model.parameters(), lr = learning_rate)
 
@@ -65,9 +71,9 @@ for e in range(epochs):
         model.train()
         f,l = d
      
-        y= model(f.float().cuda())
+        y= model(f.float().to(device))
 
-        loss= criterion(y,l.cuda())
+        loss= criterion(y,l.to(device))
         print("Iteration %d in epoch%d--> loss = %f"%(i,e,loss.item()))
         loss.backward()
         optimizer.step()
@@ -78,7 +84,7 @@ for e in range(epochs):
             for j,eval_data in enumerate(valid_set_generator):
                 feat,label = eval_data
 
-                y_eval = model(feat.float().cuda())                
+                y_eval = model(feat.float().to(device))
                 _, pred = torch.max(y_eval.detach().cpu(),dim=1)
 
                 correct.append((pred == label).float())
