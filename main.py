@@ -12,7 +12,7 @@ import soundfile as sf
 import numpy as np
 from scipy import signal  
 import librosa 
-from models import CNNNet, honk, TCN
+from models import TCN
 from dataset_fbank import fsc_data
 import torch.optim as optim 
 import torch.nn
@@ -23,13 +23,14 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 #reading params
 parser = argparse.ArgumentParser(description='Desciption')
-parser.add_argument('-m', '--model', type = str, help = "model name", required=True, default='best_model.pkl')
+parser.add_argument('-m', '--model', type = str, help = "model name", default='best_model.pkl')
 parser.add_argument('-b', '--blocks', type = int, help='blocks',default = 5)
 parser.add_argument('-r', '--repeats', type = int, help='repeats', default = 2)
 parser.add_argument('-lr', '--learning_rate', type = int, help = 'learning rate', default = 0.001)
 parser.add_argument('-e', '--epochs', type = int, help = 'epochs', default = 100)
-parser.add_argument('-w', '--workers', type = int, help='workers')
+parser.add_argument('-w', '--workers', type = int, help='workers',default = 1)
 parser.add_argument('-p', '--pathdataset', type = str, help='pathdataset')
+parser.add_argument('--batch_size', type = int, help='batch_size',default = 200)
 
 arg = parser.parse_args()
 path_dataset = arg.pathdataset
@@ -39,26 +40,26 @@ tcnRepeats = arg.repeats
 learning_rate = arg.learning_rate
 epochs = arg.epochs
 modelname = arg.model
-
+batch_size = arg.batch_size
 ##Set device as cuda if available, otherwise cpu
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print('Using device %s' % device)
 
-train_data = fsc_data( path_dataset + 'data/train_data.csv', max_len = 64000)
-params = {'batch_size': 200,
+train_data = fsc_data( path_dataset + '/data/train_data.csv', max_len = 64000)
+params = {'batch_size': batch_size,
           'shuffle': True,
           'num_workers': numworkers}
 train_set_generator=data.DataLoader(train_data,**params)
   
 
-valid_data = fsc_data(path_dataset + 'data/valid_data.csv',max_len = 64000)
-params = {'batch_size': 100,
+valid_data = fsc_data(path_dataset + '/data/valid_data.csv',max_len = 64000)
+params = {'batch_size': batch_size,
           'shuffle': False,
           'num_workers': numworkers}
 valid_set_generator=data.DataLoader(valid_data,**params)
 
-model = TCN(n_blocks=tcnBlocks, n_repeats=tcnRepeats).to(device)
+model = TCN(n_blocks=tcnBlocks, n_repeats=tcnRepeats, out_chan=248).to(device)
 
 optimizer = optim.Adam(model.parameters(), lr = learning_rate)
 
@@ -69,11 +70,10 @@ best_accuracy = 0
 for e in range(epochs):
     for i, d in enumerate(train_set_generator):
         model.train()
-        f,l = d
-     
-        y= model(f.float().to(device))
+        f, l = d
+        y = model(f.float().to(device))
+        loss = criterion(y,l.to(device))
 
-        loss= criterion(y,l.to(device))
         print("Iteration %d in epoch%d--> loss = %f"%(i,e,loss.item()))
         loss.backward()
         optimizer.step()
@@ -91,7 +91,7 @@ for e in range(epochs):
                 if j > 10:
                     break
             acc = (np.mean(np.stack(correct)))
-            iter_acc = 'iteration %d epoch %d--> %f'%(i,e,acc)  #accuracy 
+            iter_acc = 'iteration %d epoch %d--> %f'%(i, e, acc)  #accuracy
             print(iter_acc)   
             
        

@@ -11,11 +11,14 @@ import soundfile as sf
 import numpy as np
 from scipy import signal  
 import librosa 
+
+
 class fsc_data(data.Dataset):
-    def __init__(self, csvfilename, max_len = 64000, win_len = 0.02): 
+    def __init__(self, csvfilename, max_len=64000, win_len=0.02):
         self.max_len = max_len
         self.audioid = []
         self.transcriptions = []
+        self.intent = []
         self.win_len = win_len
         self.eps = np.finfo(np.float64).eps
         
@@ -25,10 +28,18 @@ class fsc_data(data.Dataset):
             for l in lines[1:]:          
                 items = l[:-1].split(',')
                 self.audioid.append(items[1])
-                self.transcriptions.append(items[3])
+                if len(items) == 7:
+                    self.transcriptions.append(items[3])
+                else:
+                    self.transcriptions.append((" ").join(items[3:5]))
+
+                self.intent.append(tuple(items[-3:]))
+                #exit()
         utteranceset = sorted(list(set(self.transcriptions)))
         self.sentence_labels = [utteranceset.index(t) for t in self.transcriptions]
-        
+        intentset = sorted(list(set(self.intent)))
+        self.intent_labels = [intentset.index(t) for t in self.intent]
+
     def __len__(self):
         return len(self.audioid)
                 
@@ -42,6 +53,8 @@ class fsc_data(data.Dataset):
             ff = np.pad(f, [(0, self.max_len - f.shape[0]),], mode='constant')
             f=ff
         label = self.sentence_labels[index]
+        #label = self.intent_labels[index]
+
         # extracting Mel filters
         filters = librosa.filters.mel(sr,n_fft,n_mels=40)
         window  = signal.hamming(n_fft, sym=False)
@@ -49,9 +62,10 @@ class fsc_data(data.Dataset):
         melspectrum = np.log(np.dot(filters, spectrogram) + self.eps)
          
         return torch.from_numpy(melspectrum), label         
-    
+
+
 if __name__ == "__main__":
-    mydata = fsc_data('fluent_speech_commands_dataset/data/test_data.csv',max_len=64000)
+    mydata = fsc_data('fluent_speech_commands_dataset/data/test_data.csv',  max_len=64000)
     print(mydata)
     print(mydata.__len__())
 
