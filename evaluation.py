@@ -31,13 +31,14 @@ parser.add_argument('-r', '--repeats', type = int, help='repeats')
 parser.add_argument('-w', '--workers', type = int, help='workers',default=2)
 parser.add_argument('-p', '--pathdataset', type = str, help='pathdataset')
 parser.add_argument('--batch_size', type = int, help='pathdataset',default = 100)
+parser.add_argument('--n_classes', type = int, help='number of output classes',default = 248)
 
 #storing params 
 arg = parser.parse_args()
 model_name = arg.model
 path_dataset= arg.pathdataset
 batch_size=arg.batch_size
-
+n_classes=arg.n_classes
 test_data = fsc_data(path_dataset + '/data/test_data.csv',max_len = 64000)
 params = {'batch_size': batch_size,'shuffle': False,'num_workers': arg.workers}
 test_set_generator=data.DataLoader(test_data,**params)
@@ -49,7 +50,7 @@ valid_set_generator=data.DataLoader(valid_data,**params)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print('Using device %s' % device)
 
-model = TCN(n_blocks=arg.blocks,n_repeats=arg.repeats,out_chan=31)
+model = TCN(n_blocks=arg.blocks,n_repeats=arg.repeats,out_chan=n_classes)
 
 #loading the model 
 model.load_state_dict(torch.load(model_name))

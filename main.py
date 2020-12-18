@@ -31,6 +31,7 @@ parser.add_argument('-e', '--epochs', type = int, help = 'epochs', default = 100
 parser.add_argument('-w', '--workers', type = int, help='workers',default = 1)
 parser.add_argument('-p', '--pathdataset', type = str, help='pathdataset')
 parser.add_argument('--batch_size', type = int, help='batch_size',default = 200)
+parser.add_argument('--n_classes', type = int, help='number of output classes',default = 248)
 
 arg = parser.parse_args()
 path_dataset = arg.pathdataset
@@ -41,6 +42,7 @@ learning_rate = arg.learning_rate
 epochs = arg.epochs
 modelname = arg.model
 batch_size = arg.batch_size
+n_classes=arg.n_classes
 ##Set device as cuda if available, otherwise cpu
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -58,7 +60,7 @@ params = {'batch_size': batch_size,
           'num_workers': numworkers}
 valid_set_generator=data.DataLoader(valid_data,**params)
 
-model = TCN(n_blocks=tcnBlocks, n_repeats=tcnRepeats, out_chan=31).to(device)
+model = TCN(n_blocks=tcnBlocks, n_repeats=tcnRepeats, out_chan=n_classes).to(device)
 
 optimizer = optim.Adam(model.parameters(), lr = learning_rate)
 
@@ -90,7 +92,7 @@ for e in range(epochs):
                 if j > 10:
                     break
             acc = (np.mean(np.stack(correct)))
-            iter_acc = 'iteration %d epoch %d--> %f'%(i, e, acc)  #accuracy
+            iter_acc = 'iteration %d epoch %d--> %f (%f)'%(i, e, acc, best_accuracy)  #accuracy
             print(iter_acc)   
             
        
