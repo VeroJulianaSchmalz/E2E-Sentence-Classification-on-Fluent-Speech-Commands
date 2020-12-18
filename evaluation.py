@@ -14,7 +14,7 @@ import soundfile as sf
 import numpy as np
 from scipy import signal  
 import librosa 
-from models import CNNNet, honk, TCN
+from models import TCN
 from dataset_fbank import fsc_data
 import torch.optim as optim 
 import torch.nn
@@ -28,27 +28,28 @@ parser = argparse.ArgumentParser(description='Desciption')
 parser.add_argument('-m', '--model', type = str, help = "model name", required=True)
 parser.add_argument('-b', '--blocks', type = int, help = 'blocks')
 parser.add_argument('-r', '--repeats', type = int, help='repeats')
-parser.add_argument('-w', '--workers', type = int, help='workers')
+parser.add_argument('-w', '--workers', type = int, help='workers',default=2)
 parser.add_argument('-p', '--pathdataset', type = str, help='pathdataset')
+parser.add_argument('--batch_size', type = int, help='pathdataset',default = 100)
 
 #storing params 
 arg = parser.parse_args()
 model_name = arg.model
 path_dataset= arg.pathdataset
+batch_size=arg.batch_size
 
-batch_size=100
-test_data = fsc_data(path_dataset + 'data/test_data.csv',max_len = 64000)
+test_data = fsc_data(path_dataset + '/data/test_data.csv',max_len = 64000)
 params = {'batch_size': batch_size,'shuffle': False,'num_workers': arg.workers}
 test_set_generator=data.DataLoader(test_data,**params)
 
-valid_data = fsc_data(path_dataset + 'data/valid_data.csv',max_len = 64000)
+valid_data = fsc_data(path_dataset + '/data/valid_data.csv',max_len = 64000)
 params = {'batch_size': batch_size,'shuffle': False, 'num_workers': arg.workers}
 valid_set_generator=data.DataLoader(valid_data,**params)
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print('Using device %s' % device)
 
-model = TCN(n_blocks=arg.blocks,n_repeats=arg.repeats)
+model = TCN(n_blocks=arg.blocks,n_repeats=arg.repeats,out_chan=31)
 
 #loading the model 
 model.load_state_dict(torch.load(model_name))
@@ -57,9 +58,9 @@ model.to(device)
 
 correct_test = []
 for i, d in enumerate(test_set_generator):
-    print('Iter %d (%d/%d)'%(i,i*batch_size,len(test_set)))
-    feat,label=d
 
+    feat,label=d
+    print('Iter %d (%d/%d)'%(i,i*batch_size,len(test_data)),end='\r')
     z_eval = model(feat.float().to(device))
     _, pred_test = torch.max(z_eval.detach().cpu(),dim=1)
     correct_test.append((pred_test == label).float())
@@ -71,7 +72,7 @@ print("The accuracy on test set is %f" %(acc_test))
 
 correct_valid=[]
 for i, d in enumerate(valid_set_generator):
-
+    print('Iter %d (%d/%d)'%(i,i*batch_size,len(valid_data)),end='\r')
     feat,label=d
 
     a_eval = model(feat.float().to(device))
