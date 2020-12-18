@@ -26,7 +26,7 @@ parser = argparse.ArgumentParser(description='Desciption')
 parser.add_argument('-m', '--model', type = str, help = "model name", default='best_model.pkl')
 parser.add_argument('-b', '--blocks', type = int, help='blocks',default = 5)
 parser.add_argument('-r', '--repeats', type = int, help='repeats', default = 2)
-parser.add_argument('-lr', '--learning_rate', type = int, help = 'learning rate', default = 0.001)
+parser.add_argument('-lr', '--learning_rate', type = float, help = 'learning rate', default = 0.001)
 parser.add_argument('-e', '--epochs', type = int, help = 'epochs', default = 100)
 parser.add_argument('-w', '--workers', type = int, help='workers',default = 1)
 parser.add_argument('-p', '--pathdataset', type = str, help='pathdataset')
@@ -51,7 +51,6 @@ params = {'batch_size': batch_size,
           'shuffle': True,
           'num_workers': numworkers}
 train_set_generator=data.DataLoader(train_data,**params)
-  
 
 valid_data = fsc_data(path_dataset + '/data/valid_data.csv',max_len = 64000)
 params = {'batch_size': batch_size,
@@ -59,7 +58,7 @@ params = {'batch_size': batch_size,
           'num_workers': numworkers}
 valid_set_generator=data.DataLoader(valid_data,**params)
 
-model = TCN(n_blocks=tcnBlocks, n_repeats=tcnRepeats, out_chan=248).to(device)
+model = TCN(n_blocks=tcnBlocks, n_repeats=tcnRepeats, out_chan=31).to(device)
 
 optimizer = optim.Adam(model.parameters(), lr = learning_rate)
 
@@ -74,7 +73,7 @@ for e in range(epochs):
         y = model(f.float().to(device))
         loss = criterion(y,l.to(device))
 
-        print("Iteration %d in epoch%d--> loss = %f"%(i,e,loss.item()))
+        print("Iteration %d in epoch%d--> loss = %f"%(i,e,loss.item()),end='\r')
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
